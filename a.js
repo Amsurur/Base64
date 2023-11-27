@@ -14,14 +14,15 @@ fileInp.addEventListener("change", (e) => {
   console.log(file);
   let reader = new FileReader();
   reader.readAsDataURL(file);
-  console.log(reader);
+
+  console.log(reader.result);
+
   btn.onclick = async (e) => {
     try {
       let { data } = await axios.post("http://localhost:3000/data", {
         img: reader.result,
         name: textInp.value,
       });
-      console.log(data);
     } catch (error) {
       console.log(error);
     }
@@ -37,10 +38,10 @@ async function get() {
   }
 }
 
-function editUser(e) {
+function editUser(e, id) {
   editModal.showModal();
   editForm["nameEdit"].value = e.name;
-  editForm["imgEdit"].file = e.img;
+  editForm["imgEdit"].value = "";
   editForm["imgEdit"].addEventListener("change", (e) => {
     let editFile = e.target.files[0];
     const reader2 = new FileReader();
@@ -50,7 +51,7 @@ function editUser(e) {
       console.log(reader2.result);
 
       try {
-        let { data } = await axios.put("http://localhost:3000/data", {
+        let { data } = await axios.put(`http://localhost:3000/data/${id}`, {
           img: reader2.result,
           name: event.target["nameEdit"].value,
         });
@@ -76,7 +77,7 @@ function getUser(data) {
     btn.innerHTML = "edit";
     btn.onclick = () => {
       editModal.showModal();
-      editUser(e);
+      editUser(e, e.id);
     };
     img.src = e.img;
     p.innerHTML = e.name;
