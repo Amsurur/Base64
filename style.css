@@ -14,3 +14,16 @@ span {
   padding: 20px;
   display: flex;
 }
+.editModal {
+  width: 500px;
+  text-align: center;
+  padding: 20px;
+}
+.editForm {
+  display: grid;
+  justify-content: center;
+  gap: 10px;
+  width: 50%;
+  margin: 0 auto;
+  justify-content: center;
+}

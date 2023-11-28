@@ -6,28 +6,31 @@ const textInp = document.getElementById("textInp");
 let editModal = document.querySelector(".editModal");
 let editClose = document.querySelector(".editClose");
 let editForm = document.querySelector(".editForm");
+let editimg = document.querySelector(".editimg");
 editClose.onclick = () => {
   editModal.close();
 };
-fileInp.addEventListener("change", (e) => {
-  let file = e.target.files[0];
-  console.log(file);
+
+fileInp.onchange = (event) => {
+  const file = event.target.files[0];
   let reader = new FileReader();
   reader.readAsDataURL(file);
-
-  console.log(reader.result);
-
-  btn.onclick = async (e) => {
-    try {
-      let { data } = await axios.post("http://localhost:3000/data", {
-        img: reader.result,
-        name: textInp.value,
-      });
-    } catch (error) {
-      console.log(error);
-    }
+  btn.onclick = () => {
+    postData(reader.result);
   };
-});
+};
+
+async function postData(result) {
+  try {
+    const { data } = await axios.post(API, {
+      name: textInp.value,
+      img: result,
+    });
+    get();
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 async function get() {
   try {
@@ -38,32 +41,59 @@ async function get() {
   }
 }
 
-function editUser(e, id) {
+function edit(e, id) {
   editModal.showModal();
   editForm["nameEdit"].value = e.name;
-  editForm["imgEdit"].value = "";
-  editForm["imgEdit"].addEventListener("change", (e) => {
-    let editFile = e.target.files[0];
+  editimg.src = e.img;
+  editForm["imgEdit"].file = e.img;
+  editForm["imgEdit"].onchange = (event) => {
+    let editFile = event.target.files[0];
     const reader2 = new FileReader();
     reader2.readAsDataURL(editFile);
-    editForm.onsubmit = async (event) => {
+    editForm.onsubmit = (event) => {
       event.preventDefault();
-      console.log(reader2.result);
-
-      try {
-        let { data } = await axios.put(`http://localhost:3000/data/${id}`, {
-          img: reader2.result,
-          name: event.target["nameEdit"].value,
-        });
-        get();
-      } catch (error) {
-        console.error(error);
-      }
-
-      editModal.close();
+      editData(id, reader2.result);
     };
-  });
+  };
 }
+
+async function editData(id, result2) {
+  try {
+    const { data } = await axios.put(`${API}/${id}`, {
+      img: result2,
+      name: editForm["nameEdit"].value,
+    });
+    get();
+  } catch (error) {
+    console.error(error);
+  }
+}
+// function editUser(e, id) {
+//   editModal.showModal();
+//   editForm["nameEdit"].value = e.name;
+//   editForm["imgEdit"].file = btoa(e.img);
+//   editForm["imgEdit"].addEventListener("change", (e) => {
+//     let editFile = e.target.files[0];
+//     const reader2 = new FileReader();
+//     reader2.readAsDataURL(editFile);
+//     editForm.onsubmit = async (event) => {
+//       event.preventDefault();
+//       console.log(reader2.result);
+
+//       try {
+//         let { data } = await axios.put(`http://localhost:3000/data/${id}`, {
+//           img: reader2.result,
+//           name: event.target["nameEdit"].value,
+//         });
+//         get();
+//       } catch (error) {
+//         console.error(error);
+//       }
+
+//       editModal.close();
+//     };
+//   });
+// }
 
 function getUser(data) {
   box.innerHTML = "";
@@ -77,7 +107,7 @@ function getUser(data) {
     btn.innerHTML = "edit";
     btn.onclick = () => {
       editModal.showModal();
-      editUser(e, e.id);
+      edit(e, e.id);
     };
     img.src = e.img;
     p.innerHTML = e.name;
